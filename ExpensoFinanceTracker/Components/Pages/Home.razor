@@ -1,0 +1,600 @@
+﻿@page "/home"
+
+@using ExpensoFinanceTracker.DataModel.Models
+@using MudBlazor
+
+<div style="margin-bottom: 15px; padding : 10px">
+    <input type="text" @bind= "Search" class="search-input text-dark" placeholder="Enter Name" style="margin-right: 10px; border: 1px solid #134f5c; border-radius: 8px; padding: 5px 10px;" />
+    <button class="btn btn-primary" @onclick="FilteredTxn" style="background-color: #0c343d; border: none;">Filter</button>
+</div>
+<button class="btn btn-lg btn-secondary" @onclick="ShowLogoutConfirmation" style="position: fixed; top: 20px; right: 20px; background-color: #134f5c; color: white; border: none;">Logout</button>
+<button class="btn btn-lg btn-secondary" @onclick="UserProfile" style="position: fixed; top: 20px; right: 140px; background-color: #134f5c; color: white; border: none;">User Profile</button>
+
+<div class="container mt-5">
+    <h3 style="color:#0c343d; text-align:center; padding-bottom: 20px">Expenso Summary</h3>
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="expenso-card">
+                <h6>Inflow</h6>
+                <h3>@IncomingFunds</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="expenso-card" style="background-color: #76a5af;">
+                <h6>Outflow</h6>
+                <h3>@TotalExpenses</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="expenso-card" style="background-color: #9fc5e8;">
+                <h6>Outstanding Debt</h6>
+                <h3>@OutstandingDebt</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="expenso-card" style="background-color: #134f5c;">
+                <h6>Total</h6>
+                <h3>@Total</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <!-- Transaction Insights -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm" style="border: none;">
+                <div class="card-header" style="background-color: #0c343d; color: #9fc5e8;">
+                    Highest Inflow
+                </div>
+                <div class="card-body" style="background-color: #134f5c; color: #ffffff;">
+                    <h5>@HighestInflow.ToString("C")</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm" style="border: none;">
+                <div class="card-header" style="background-color: #134f5c; color: #9fc5e8;">
+                    Highest Outflow
+                </div>
+                <div class="card-body" style="background-color: #45818e; color: #ffffff;">
+                    <h5>@HighestOutflow.ToString("C")</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm" style="border: none;">
+                <div class="card-header" style="background-color: #45818e; color: #9fc5e8;">
+                    Highest Debt
+                </div>
+                <div class="card-body" style="background-color: #76a5af; color: #ffffff;">
+                    <h5>@HighestDebt.ToString("C")</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm" style="border: none;">
+                <div class="card-header" style="background-color: #0c343d; color: #9fc5e8;">
+                    Lowest Inflow
+                </div>
+                <div class="card-body" style="background-color: #134f5c; color: #ffffff;">
+                    <h5>@LowestInflow.ToString("C")</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm" style="border: none;">
+                <div class="card-header" style="background-color: #134f5c; color: #9fc5e8;">
+                    Lowest Outflow
+                </div>
+                <div class="card-body" style="background-color: #45818e; color: #ffffff;">
+                    <h5>@LowestOutflow.ToString("C")</h5>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center shadow-sm" style="border: none;">
+                <div class="card-header" style="background-color: #45818e; color: #9fc5e8;">
+                    Lowest Debt
+                </div>
+                <div class="card-body" style="background-color: #76a5af; color: #ffffff;">
+                    <h5>@LowestDebt.ToString("C")</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<h2 style="padding-top: 20px">Transaction List</h2>
+<button class="btn btn-primary add-transaction" @onclick="ShowAddTransactionPopup">Add Transaction</button>
+
+<ul style="padding-top: 10px" class="nav nav-tabs">
+    <li class="nav-item">
+        <a class='nav-link btn @(_tabFilter == "All" ? "active" : "")' @onclick='()=>TabFilter("All")' style="color: #0c343d;">All</a>
+    </li>
+    <li class="nav-item">
+        <a class='nav-link btn @(_tabFilter == "Income" ? "active" : "")' @onclick='()=>TabFilter("Credit")' style="color: #45818e;">Credit</a>
+    </li>
+    <li class="nav-item">
+        <a class='nav-link btn @(_tabFilter == "Expense" ? "active" : "")' @onclick='()=>TabFilter("Debit")' style="color: #76a5af;">Debit</a>
+    </li>
+    <li class="nav-item">
+        <a class='nav-link btn @(_tabFilter == "Debt" ? "active" : "")' @onclick='()=>TabFilter("Debt")' style="color: #9fc5e8;">Debt</a>
+    </li>
+</ul>
+
+
+
+@if (Filtered.Any())
+{
+    <div class="table-responsive mt-3">
+        <table class="table table-hover table-bordered shadow-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">Transaction Name</th>
+                    <th scope="col">Amount</th>
+                    <th scope="col">Type</th>
+                    <th scope="col">Date</th>
+                    @if (_tabFilter == "Debt")
+                    {
+                        <th scope="col">Due Date</th>
+                    }
+                    <th scope="col">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var transaction in FilteredAndSortedTransactions())
+                {
+                    <tr>
+                        <td>@transaction.TxnName</td>
+                        <td>@transaction.TxnAmount.ToString("C")</td>
+                        <td>
+                            <span style="color: black" class="badge @(transaction.TxnType == "Credit"
+                                                   ? "badge-success"
+                                                   : transaction.TxnType == "Debit"
+                                                       ? "badge-danger"
+                                                       : transaction.TxnType == "Debt"
+                                                           ? "badge-warning"
+                                                           : "badge-secondary")">
+                                @transaction.TxnType
+                            </span>
+                        </td>
+                        <td>@transaction.TxnDate.ToString("MMM dd, yyyy")</td>
+                        @if (_tabFilter == "Debt")
+                        {
+                            <td>
+                                @if (transaction.DueDate.HasValue)
+                                {
+                                    @transaction.DueDate.Value.ToString("MMM dd, yyyy")
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            </td>
+                        }
+                        <td>
+                            <button class="btn btn-primary" @onclick="() => EditTransaction(transaction.TxnId)">Edit</button>
+
+                            <button class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash-alt"></i>
+                                @(transaction.TxnType == "Debt" ? "Clear" : "Delete")
+                            </button>
+
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p>No Transactions found.</p>
+}
+
+<!-- Donut Chart for Top 5 Transactions -->
+<h4 style="color: #134f5c;">Top 5 Transactions PieChart</h4>
+
+<div class="text-center mt-4">
+    <MudChart ChartType="ChartType.Pie"
+              InputData="@TopTransactions.Select(t => Convert.ToDouble(t.TxnAmount)).ToArray()"
+              InputLabels="@TopTransactions.Select(t => t.TxnName ?? "No Title").ToArray()"
+              Width="350px"
+              Height="350px"
+              ShowLegend="true"
+               />
+</div>
+
+<style>
+    .text-center h4 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #134f5c;
+    }
+
+    .mud-chart {
+        margin: 0 auto;
+        padding: 10px;
+    }
+
+    .mud-chart canvas {
+        background-color: transparent !important;
+        border-radius: 8px;
+    }
+</style>
+
+
+
+<!-- Top 5 Transactions -->
+    <div class="mt-5">
+        <h3>Top 5 Transactions</h3>
+    @if (TopTransactions?.Any() == true)
+    {
+                <table class="table table-bordered table-hover mt-3">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                @foreach (var transaction in TopTransactions)
+                {
+                                <tr>
+                                    <td>@transaction.TxnName</td>
+                                    <td>@transaction.TxnDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@transaction.TxnAmount</td>
+                                    <td>@transaction.TxnType</td>
+                                </tr>
+                }
+                    </tbody>
+                </table>
+    }
+    else
+    {
+                <p class="text-muted">No transactions available to display.</p>
+    }
+    </div>
+
+@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-info">
+        @Message
+    </div>
+}
+
+<!-- Edit Transaction Modal -->
+@if (ShowEditTransaction)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display: block; background-color: rgba(12, 52, 61, 0.8); position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: auto;">
+        <div class="modal-dialog" role="document" style="margin: 10% auto; max-width: 450px;">
+            <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);">
+                <div class="modal-header" style="background-color: #134f5c; color: #ffffff;">
+                    <h5 class="modal-title">Edit Transaction</h5>
+                    <button type="button" class="close btn" @onclick="HideEditTransactionPopup" style="background: none; border: none; color: #ffffff; font-size: 1.5rem;">
+                        &times;
+                    </button>
+                </div>
+                <div class="modal-body" style="padding: 20px; background-color: #f0f7f9;">
+                    <div class="form-group">
+                        <label for="txnName" style="color: #0c343d; font-weight: bold;">Transaction Name</label>
+                        <input required id="txnName" type="text" placeholder="Enter transaction name" @bind="editTransactionDto.TxnName" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="txnAmount" style="color: #0c343d; font-weight: bold;">Amount</label>
+                        <input required id="txnAmount" type="number" placeholder="Enter amount" @bind="editTransactionDto.TxnAmount" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label for="txnType" style="color: #0c343d; font-weight: bold;">Type</label>
+                        <select required id="txnType" @bind="editTransactionDto.TxnType" class="form-control">
+                            <option disabled selected>Select transaction type</option>
+                            <option>Debit</option>
+                            <option>Credit</option>
+                            <option>Debt</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="txnTags" style="color: #0c343d; font-weight: bold;">Tags</label>
+                        <select required id="txnTags" @bind="editTransactionDto.TxnTags" class="form-control">
+                            <option disabled selected>Select transaction tag</option>
+                            <option>Food</option>
+                            <option>Service</option>
+                            <option>Bills</option>
+                        </select>
+                    </div>
+                    @if (editTransactionDto.TxnType == "Debt")
+                    {
+                        <div class="form-group">
+                            <label for="dueDate" style="color: #0c343d; font-weight: bold;">Due Date</label>
+                            <input required id="dueDate" type="date" @bind="editTransactionDto.DueDate" class="form-control" />
+                        </div>
+                    }
+                </div>
+
+                <div class="modal-footer" style="background-color: #f0f7f9; border-top: none; display: flex; justify-content: space-between;">
+                    <button type="button" class="btn" @onclick="HideEditTransactionPopup" style="background-color: #9fc5e8; color: #0c343d; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold;">Cancel</button>
+                    <button type="button" class="btn" @onclick="SaveEditedTransaction" style="background-color: #45818e; color: #ffffff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold;">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Add Transaction Modal -->
+@if (ShowAddTransaction)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display: block; background-color: rgba(12, 52, 61, 0.8); position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: auto;">
+        <div class="modal-dialog" role="document" style="margin: 10% auto; max-width: 450px;">
+            <div class="modal-content" style="border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);">
+                <div class="modal-header" style="background-color: #134f5c; color: #ffffff;">
+                    <h5 class="modal-title">Add Transaction</h5>
+                    <button type="button" class="close btn" @onclick="HideAddTransactionPopup" style="background: none; border: none; color: #ffffff; font-size: 1.5rem;">
+                        &times;
+                    </button>
+                </div>
+                <div class="modal-body" style="padding: 20px; background-color: #f0f7f9;">
+                    <div class="form-group">
+                        <label for="txnName" style="color: #0c343d; font-weight: bold;">Transaction Name</label>
+                        <input required id="txnName" type="text" placeholder="Enter transaction name" @bind="transactionDto.TxnName" class="form-control" style="border: 1px solid #76a5af; border-radius: 8px; padding: 10px;" />
+                        @if (string.IsNullOrWhiteSpace(transactionDto.TxnName))
+                        {
+                            <div class="text-info mt-3">@Message</div>
+                        }
+                    </div>
+                    <div class="form-group">
+                            <label for="txnName" style="color: #0c343d; font-weight: bold;">Transaction Description</label>
+                        <input required id="txnName" type="text" placeholder="Enter transaction description" @bind="transactionDto.TxnDescription" class="form-control" style="border: 1px solid #76a5af; border-radius: 8px; padding: 10px;" />
+                    </div>
+                    <div class="form-group">
+                        <label for="txnAmount" style="color: #0c343d; font-weight: bold;">Amount</label>
+                        <input required id="txnAmount" type="number" placeholder="Enter amount" @bind="transactionDto.TxnAmount" class="form-control" style="border: 1px solid #76a5af; border-radius: 8px; padding: 10px;" />
+                        @if (transactionDto.TxnAmount <= 0)
+                        {
+                            <div class="text-info mt-3">@Message</div>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label for="txnType" style="color: #0c343d; font-weight: bold;">Type</label>
+                        <select required id="txnType" @bind="transactionDto.TxnType" class="form-control" style="border: 1px solid #76a5af; border-radius: 8px; padding: 10px;">
+                            <option disabled selected>Select transaction type</option>
+                            <option>Debit</option>
+                            <option>Credit</option>
+                            <option>Debt</option>
+                        </select>
+                        @if (string.IsNullOrWhiteSpace(transactionDto.TxnType))
+                        {
+                            <div class="text-info mt-3">@Message</div>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label for="txnTags" style="color: #0c343d; font-weight: bold;">Tags</label>
+                        <select required id="txnTags" @bind="transactionDto.TxnTags" class="form-control" style="border: 1px solid #76a5af; border-radius: 8px; padding: 10px;">
+                            <option disabled selected>Select transaction tag</option>
+                            <option>Food</option>
+                            <option>Service</option>
+                            <option>Bills</option>
+                        </select>
+                        @if (string.IsNullOrWhiteSpace(transactionDto.TxnTags))
+                        {
+                            <div class="text-info mt-3">@Message</div>
+                        }
+                    </div>
+                    <div class="form-group">
+                        <label for="txnDate" style="color: #0c343d; font-weight: bold;">Date</label>
+                        <input required id="txnDate" type="date" @bind="transactionDto.TxnDate" class="form-control" style="border: 1px solid #76a5af; border-radius: 8px; padding: 10px;" />
+                        @if (transactionDto.TxnDate == null)
+                        {
+                            <div class="text-info mt-3">@Message</div> 
+                        }
+                    </div>
+
+                    @if (transactionDto.TxnType == "Debt")
+                    {
+                        <div class="form-group">
+                            <label for="dueDate" style="color: #0c343d; font-weight: bold;">Due Date</label>
+                            <input required id="dueDate" type="date" @bind="transactionDto.DueDate" class="form-control" style="border: 1px solid #76a5af; border-radius: 8px; padding: 10px;" />
+                            @if (transactionDto.DueDate == null)
+                            {
+                                <div class="text-info mt-3">@Message</div> 
+                            }  
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer" style="background-color: #f0f7f9; border-top: none; display: flex; justify-content: space-between;">
+                    <button type="button" class="btn" @onclick="HideAddTransactionPopup" style="background-color: #9fc5e8; color: #0c343d; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold;">Cancel</button>
+                    <button type="button" class="btn" @onclick="SaveTransaction" style="background-color: #45818e; color: #ffffff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold;">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Logout Modal -->
+@if (IslogOut)
+{
+    <div class="modal" tabindex="-1" role="dialog" style="display: block; background-color: rgba(12, 52, 61, 0.7); position: fixed; top: 0; left: 0; width: 100%; height: 100%; overflow: auto;">
+        <div class="modal-dialog" role="document" style="margin: 10% auto; max-width: 400px;">
+            <div class="modal-content shadow-lg" style="border-radius: 8px; background-color: #f5f8fa;">
+                <div class="modal-header" style="background-color: #134f5c; color: #ffffff; border-bottom: none;">
+                    <h5 class="modal-title" style="font-weight: bold;">Confirm Logout</h5>
+                    <button type="button" class="close" @onclick="HideLogoutConfirmation" style="background: none; border: none; font-size: 1.5rem; color: #ffffff;">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="padding: 20px; font-size: 1rem; color: #134f5c; text-align: center;">
+                    <p>Are you sure you want to logout?</p>
+                </div>
+                <div class="modal-footer" style="border-top: none; padding: 15px; display: flex; justify-content: center; gap: 10px;">
+                    <button type="button" class="btn" @onclick="HideLogoutConfirmation" style="background-color: #76a5af; color: #ffffff; border: none; padding: 10px 20px; border-radius: 4px; font-size: 1rem;">
+                        No
+                    </button>
+                    <button type="button" class="btn" @onclick="Logout" style="background-color: #0c343d; color: #ffffff; border: none; padding: 10px 20px; border-radius: 4px; font-size: 1rem;">
+                        Yes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+<style>
+    .expenso-card {
+        border-radius: 12px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        margin-bottom: 25px;
+        text-align: center;
+        background-color: #45818e;
+        color: white;
+    }
+
+    .finance-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .chart-section {
+        height: 320px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #9fc5e8;
+        border-radius: 12px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background-color: #134f5c;
+        color: white;
+    }
+
+    .transaction-section {
+        margin-top: 25px;
+    }
+
+    .transaction-entry {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .date-filter {
+        margin-bottom: 15px;
+    }
+
+    .modal-header {
+        border-bottom: 2px solid #0c343d;
+        padding: 15px 20px;
+        background-color: #134f5c;
+        color: white;
+    }
+
+    .modal-body {
+        padding: 20px;
+        font-size: 1rem;
+        background-color: #f1f1f1;
+        border-radius: 8px;
+    }
+
+    .modal-footer {
+        border-top: none;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    button.btn-primary {
+        background-color: #0c343d;
+        border: none;
+        color: white;
+    }
+    button.btn-primary:hover {
+        background-color: #134f5c;
+    }
+
+    button.btn-secondary {
+        background-color: #76a5af;
+        border: none;
+        color: white;
+    }
+
+        button.btn-secondary:hover {
+            background-color: #45818e;
+        }
+
+    .table {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 5px 10px;
+        border-radius: 8px;
+    }
+
+    .thead-dark th {
+        color: #fff;
+        background-color: #0c343d;
+        text-align: center;
+    }
+
+    .table td, .table th {
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    button.btn-outline-danger {
+        border: 1px solid #dc3545;
+        color: #dc3545;
+        transition: 0.3s;
+    }
+    
+    button.btn-outline-danger:hover {
+        background-color: #dc3545;
+        color: #fff;
+}
+
+    .text-muted {
+        margin-top: 20px;
+        font-size: 1rem;
+        color: #6c757d;
+    }
+        .donut-chart canvas {
+        background-color: transparent !important;
+    }
+
+    .donut-chart {
+        margin: 0 auto;
+    }
+
+    .text-center h4 {
+        font-size: 1.5rem;
+        margin-bottom: 1rem;
+        color: #134f5c;
+    }
+</style>

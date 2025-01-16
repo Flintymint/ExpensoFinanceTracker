@@ -1,0 +1,41 @@
+﻿@using ExpensoFinanceTracker.DataModel.Models
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation  
+@* Required *@
+<MudThemeProvider />
+<MudPopoverProvider />
+
+@* Needed for dialogs *@
+<MudDialogProvider />
+
+@* Needed for snackbars *@
+<MudSnackbarProvider />
+
+<div class="page">
+    @if (_globalState.CurrentUser != null)
+    {
+            <div class="sidebar">
+                <NavMenu Username="@_globalState.CurrentUser.Username" Currency="@_globalState.CurrentUser.Currency" LogoutHandler="LogoutHandler" />
+            </div>
+    }
+    <main>
+        <article class="content px-4">
+            <CascadingValue Value="@_globalState">
+                @Body
+            </CascadingValue>
+        </article>
+    </main>
+</div>
+
+@code {
+    private GlobalState _globalState = new();
+
+    private void LogoutHandler()
+    {
+        if (_globalState.CurrentUser == null)
+        {
+            Navigation.NavigateTo("/loginpage");
+        }
+    }
+
+}

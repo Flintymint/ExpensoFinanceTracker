@@ -1,0 +1,178 @@
+﻿@page "/userprofile"
+
+<button class="btn btn-lg btn-secondary" @onclick="HomePage" style="position: fixed; top: 20px; right: 20px; background-color: #134f5c; color: white; border: none;">Back</button>
+<div class="container mt-4">
+    <!-- Profile Header -->
+    <div class="profile-header text-center mb-4">
+        <h2>User Profile</h2>
+        <p class="text-muted">Manage your transactions and debts</p>
+    </div>
+
+    <!-- Transaction Filtering -->
+    <div class="row mb-3">
+        <div class="col-md-5">
+            <label for="startDate" class="form-label">Start Date</label>
+            <input type="date" id="startDate" class="form-control" @bind="StartDate" />
+        </div>
+        <div class="col-md-5">
+            <label for="endDate" class="form-label">End Date</label>
+            <input type="date" id="endDate" class="form-control" @bind="EndDate" />
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button class="btn btn-primary w-100" @onclick="FilteredTxn">Filter</button>
+        </div>
+    </div>
+
+    <!-- Filtered Transactions -->
+    <div>
+        <h3>Filtered Transactions</h3>
+        @if (Filtered?.Any() == true)
+        {
+                <table class="table table-bordered table-hover mt-3">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var transaction in Filtered)
+                    {
+                                <tr>
+                                    <td>@transaction.TxnName</td>
+                                    <td>@transaction.TxnDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@transaction.TxnAmount</td>
+                                    <td>@transaction.TxnType</td>
+                                </tr>
+                    }
+                    </tbody>
+                </table>
+        }
+        else if (!string.IsNullOrEmpty(Message))
+        {
+                <p class="text-muted">@Message</p>
+        }
+    </div>
+</div>
+
+<div class="import-container d-flex flex-column align-items-center">
+    <h1 class="text-center mb-4">Import CSV</h1>
+
+    <div class="import-card">
+        <form @onsubmit="HandleImport">
+            <div class="mb-3">
+                <label for="csvFile" class="form-label">Select CSV File</label>
+                <input type="file" id="csvFile" @onchange="OnFileSelected" class="form-control" accept=".csv" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(ImportMessage))
+            {
+                <div class="alert alert-info mt-3">@ImportMessage</div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100 mt-3">Import</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .import-container {
+        height: 100vh;
+        background: linear-gradient(135deg, #76a5af, #9fc5e8);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .import-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 2rem;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        font-size: 1.75rem;
+        color: #0c343d;
+        font-weight: bold;
+    }
+
+    .form-control {
+        border: 2px solid #45818e;
+        border-radius: 8px;
+    }
+
+        .form-control:focus {
+            box-shadow: 0 0 5px rgba(69, 129, 142, 0.8);
+            border-color: #134f5c;
+        }
+
+    .btn-primary {
+        background-color: #134f5c;
+        border-color: #134f5c;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+
+        .btn-primary:hover {
+            background-color: #0c343d;
+        }
+
+    .alert-info {
+        font-size: 0.9rem;
+        color: #055160;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        border-radius: 6px;
+    }
+
+
+    .profile-header h2 {
+        color: #134f5c;
+    }
+
+    .card {
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .list-group-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .badge {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+
+    .table {
+        text-align: center;
+    }
+
+    .thead-dark th {
+        background-color: #134f5c;
+        color: white;
+    }
+
+    .btn-primary {
+        background-color: #134f5c;
+        border: none;
+    }
+
+    .btn-primary:hover {
+        background-color: #0c343d;
+    }
+</style>
+
+
+

@@ -1,0 +1,100 @@
+﻿@page "/loginpage"
+
+<div class="login-container d-flex justify-content-center align-items-center">
+    <div class="login-card">
+        <h1 class="text-center mb-4">Welcome to Expenso</h1>
+
+        <form @onsubmit="HandleLogin">
+            <!-- Username Input -->
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" @bind="Users.Username" placeholder="Username" required />
+                <label>Username</label>
+            </div>
+
+            <!-- Password Input -->
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control" @bind="Users.Password" placeholder="Password" required />
+                <label>Password</label>
+            </div>
+
+            <!-- Currency Selection -->
+            <div class="form-floating mb-3">
+                <select id="txnType" @bind="Users.Currency" class="form-control" required>
+                    <option value="" disabled selected>Select Currency</option>
+                    <option>USD</option>
+                    <option>NPR</option>
+                    <option>INR</option>
+                </select>
+                <label for="txnType">Currency</label>
+            </div>
+
+            <!-- Error Message -->
+            @if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                <div class="alert alert-danger mt-2" role="alert">@ErrorMessage</div>
+            }
+
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .login-container {
+        height: 100vh;
+        
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Roboto', sans-serif;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 400px;
+        padding: 2rem;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+        color: #0c343d;
+        font-weight: bold;
+    }
+
+    .form-control {
+        border: 2px solid #45818e;
+        border-radius: 8px;
+    }
+
+        .form-control:focus {
+            box-shadow: 0 0 5px rgba(69, 129, 142, 0.8);
+            border-color: #134f5c;
+        }
+
+    .btn-primary {
+
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+
+        .btn-primary:hover {
+            background-color: #0c343d;
+        }
+
+    .alert-danger {
+        font-size: 0.9rem;
+        color: #721c24;
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        border-radius: 6px;
+    }
+
+    label {
+        color: #0c343d;
+    }
+</style>
