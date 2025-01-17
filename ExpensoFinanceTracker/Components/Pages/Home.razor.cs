@@ -9,7 +9,6 @@ namespace ExpensoFinanceTracker.Components.Pages
     {
         private List<Transaction> Transactions = new();
         private List<Transaction> Filtered = new();
-        private Transaction _txnModel = new();
         private string Message = string.Empty;
         private List<Transaction> TopTransactions = new();
         private bool ShowAddTransaction = false;
@@ -26,10 +25,13 @@ namespace ExpensoFinanceTracker.Components.Pages
             CalculateTransactionInsights();
 
         }
+
         private async Task<List<Transaction>> GetAllTransaction()
         {
             return await UserTxnService.GetAllTransaction();
         }
+
+        #region Summary Calculation
         private double IncomingFunds { get; set; }
         private double TotalExpenses { get; set; }
         private double OutstandingDebt { get; set; }
@@ -51,6 +53,7 @@ namespace ExpensoFinanceTracker.Components.Pages
 
             Total = IncomingFunds - TotalExpenses;
         }
+
         private double HighestInflow { get; set; }
         private double LowestInflow { get; set; }
         private double HighestOutflow { get; set; }
@@ -69,6 +72,7 @@ namespace ExpensoFinanceTracker.Components.Pages
             HighestDebt = Filtered.Where(t => t.TxnType == "Debt").Max(t => t.TxnAmount);
             LowestDebt = Filtered.Where(t => t.TxnType == "Debt").Min(t => t.TxnAmount);
         }
+        #endregion
 
         #region  Search
         private string _search = string.Empty;
@@ -115,8 +119,8 @@ namespace ExpensoFinanceTracker.Components.Pages
         }
         #endregion
 
-        
 
+        #region Sort
         private IEnumerable<Transaction> FilteredAndSortedTransactions()
         {
             var filtered = Filtered;
@@ -138,8 +142,8 @@ namespace ExpensoFinanceTracker.Components.Pages
             _tabFilter = filter;
             StateHasChanged();
         }
+        #endregion
 
-        
 
         #region SaveTransaction
         private Transaction transactionDto { get; set; } = new Transaction();
@@ -169,7 +173,6 @@ namespace ExpensoFinanceTracker.Components.Pages
                 Message = "Transaction not completed!";
             }
         }
-
         private void ShowAddTransactionPopup()
         {
             transactionDto = new Transaction();
@@ -246,14 +249,7 @@ namespace ExpensoFinanceTracker.Components.Pages
             {
                 Message = "Failed to update transaction.";
             }
-        }
-
-
-        private void ShowEditTransactionPopup()
-        {
-            ShowEditTransaction = true;
-        }
-        
+        }        
         private void HideEditTransactionPopup()
         {
             ShowEditTransaction = false;
@@ -285,18 +281,6 @@ namespace ExpensoFinanceTracker.Components.Pages
         
 
         #region Delete Confirmantion
-
-        private bool IsDelete = false;
-        private void ShowDeleteConfirmation()
-        {
-            IsDelete = true;
-        }
-
-        private void HideDeleteConfirmation()
-        {
-            IsDelete = false;
-        }
-
         private async Task DeleteTransaction(Guid txnid)
         {
             var response = await UserTxnService.DeleteTransaction(txnid);
@@ -304,8 +288,6 @@ namespace ExpensoFinanceTracker.Components.Pages
             if (response)
             {
                 Transactions = await GetAllTransaction();
-                
-                IsDelete = false; 
             }
 
         }

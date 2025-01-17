@@ -24,6 +24,7 @@ namespace ExpensoFinanceTracker.Components.Pages
             }
         }
 
+        #region Filter Transactions to date range
         private async Task FilteredTxn()
         {
             try
@@ -51,38 +52,8 @@ namespace ExpensoFinanceTracker.Components.Pages
 
             StateHasChanged();
         }
+        #endregion
 
-        private string ImportMessage = string.Empty;
-        private IBrowserFile? UploadedFile;
-
-        private async Task OnFileSelected(InputFileChangeEventArgs e)
-        {
-            UploadedFile = e.File;
-            ImportMessage = $"Selected file: {UploadedFile.Name}";
-        }
-
-        private async Task HandleImport()
-        {
-            if (UploadedFile == null)
-            {
-                ImportMessage = "Please select a file to import.";
-                return;
-            }
-
-            try
-            {
-                using var stream = UploadedFile.OpenReadStream();
-                using var reader = new StreamReader(stream);
-                var content = await reader.ReadToEndAsync();
-
-                // Process CSV content here
-                ImportMessage = "File imported successfully!";
-            }
-            catch (Exception ex)
-            {
-                ImportMessage = $"Error importing file: {ex.Message}";
-            }
-        }
         #region Navigation to UserProfile
         private void HomePage()
         {

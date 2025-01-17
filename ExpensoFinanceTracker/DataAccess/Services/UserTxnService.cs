@@ -7,15 +7,14 @@ namespace ExpensoFinanceTracker.DataAccess.Services
     {
         private List<Transaction> _transactions;
 
+        // load transaction logic
         public UserTxnService()
         {
             _transactions = LoadTransaction();
-
-            // Add default admin user if the file is empt
         }
         
         
-        // Simulated New transaction logic
+        // Add New transaction logic
         public async Task AddTxn(Transaction transaction)
         {
             _transactions.Add(new Transaction { TxnName = transaction.TxnName, TxnAmount = transaction.TxnAmount,
@@ -24,6 +23,7 @@ namespace ExpensoFinanceTracker.DataAccess.Services
             SaveTransactions(_transactions);
         }
 
+        // Update transaction logic
         public async Task<bool> UpdateTxn(Transaction upttransaction)
         {
             try
@@ -48,12 +48,7 @@ namespace ExpensoFinanceTracker.DataAccess.Services
             
         }
 
-        public async Task<Transaction> GetTxnById(Guid txnId)
-        {
-            var transaction = _transactions.FirstOrDefault(t => t.TxnId == txnId);
-            return await Task.FromResult(transaction);
-        }
-
+        // Delete transaction logic
         public async Task<bool> DeleteTransaction(Guid txnid)
         {
             var transaction = _transactions.FirstOrDefault(t => t.TxnId == txnid);
@@ -67,13 +62,13 @@ namespace ExpensoFinanceTracker.DataAccess.Services
             return true;
         }
 
-        // Simulated retrieval logic
+        // retrieval logic for getting all transactions
         public async Task<List<Transaction>> GetAllTransaction()
         {
            return _transactions;
         }
 
-        // Simulated Search txn logic
+        // Simulated Search transaction logic
         public async Task<List<Transaction>> SearchTransaction(string searchName)
         {
             try

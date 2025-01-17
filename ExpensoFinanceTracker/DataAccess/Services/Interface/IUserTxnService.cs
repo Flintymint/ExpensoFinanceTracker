@@ -16,7 +16,5 @@ namespace ExpensoFinanceTracker.DataAccess.Services.Interface
         Task AddTxn(Transaction transaction);
 
         Task<bool> UpdateTxn(Transaction transaction); // New method for editing
-
-        Task<Transaction> GetTxnById(Guid txnId); // For retrieving a specific transaction
     }
 }
