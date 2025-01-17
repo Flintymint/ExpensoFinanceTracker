@@ -184,7 +184,7 @@
                         <td>
                             <button class="btn btn-primary" @onclick="() => EditTransaction(transaction.TxnId)">Edit</button>
 
-                            <button class="btn btn-outline-danger btn-sm">
+                            <button class="btn btn-outline-danger btn-sm" @onclick="() =>DeleteTransaction(transaction.TxnId)">
                                 <i class="fas fa-trash-alt"></i>
                                 @(transaction.TxnType == "Debt" ? "Clear" : "Delete")
                             </button>
